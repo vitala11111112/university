@@ -1,50 +1,66 @@
 import sqlite3
 class University():
-    def __init__(self):
-        self.con = sqlite3.connect("university.db")
-        self.cur = self.con.cursor()
-        self.cur.execute("""CREATE TABLE IF NOT EXISTS university(id INT,name TEXT,age INT,grade INT)""")
-        self.con.commit()
-    def insert(self,id:int,name:str,age:int,grade:int):
-        self.cur.execute(f"""INSERT INTO university(id,name,age,grade) values({id},'{name}',{age},{grade});""")
-        self.con.commit()
-    def update(self,grade:str,id:int):
-        self.cur.execute(f"""UPDATE university SET grade = {grade} WHERE id = {id} ;""")
-        self.con.commit()
-    def delete(self,id:int):
-        self.cur.execute(f"""DELETE FROM university WHERE id = {id};""")
-        self.con.commit()
+    def __init__(self, dbname="university.db"):
+        self.dbname = dbname
+        with sqlite3.connect(self.dbname) as con:
+            cur = con.cursor()
+            cur.execute("""CREATE TABLE IF NOT EXISTS university(
+                id INT, name TEXT, age INT, grade INT)""")
+            con.commit()
+
+    def insert(self, id:int, name:str, age:int, grade:int):
+        with sqlite3.connect(self.dbname) as con:
+            cur = con.cursor()
+            cur.execute("INSERT INTO university(id,name,age,grade) VALUES (?, ?, ?, ?);",
+                        (id, name, age, grade))
+            con.commit()
+
+    def update(self, grade:int, id:int):
+        with sqlite3.connect(self.dbname) as con:
+            cur = con.cursor()
+            cur.execute("UPDATE university SET grade = ? WHERE id = ?;", (grade, id))
+            con.commit()
+
+    def delete(self, id:int):
+        with sqlite3.connect(self.dbname) as con:
+            cur = con.cursor()
+            cur.execute("DELETE FROM university WHERE id = ?;", (id,))
+            con.commit()
+
     def filter(self):
-        self.cur.execute("""SELECT name FROM university WHERE age > 18""")
-        students = self.cur.fetchall()
-        self.con.commit()
-        return students
+        with sqlite3.connect(self.dbname) as con:
+            cur = con.cursor()
+            cur.execute("SELECT name FROM university WHERE age > 18")
+            return cur.fetchall()
+
     def summ(self):
-        self.cur.execute("""SELECT * FROM university""")
-        students = self.cur.fetchall()
-        self.con.commit()
-        return len(students)
+        with sqlite3.connect(self.dbname) as con:
+            cur = con.cursor()
+            cur.execute("SELECT * FROM university")
+            return len(cur.fetchall())
+
     def read(self):
-        self.cur.execute("""SELECT * FROM university""")
-        students = self.cur.fetchall()
-        self.con.commit()   
-        return students   
-    def find(self,name:str):
-        self.cur.execute(f"""SELECT * FROM university WHERE name = '{name}' ;""")
-        students = self.cur.fetchall()
-        self.con.commit() 
-        return students
+        with sqlite3.connect(self.dbname) as con:
+            cur = con.cursor()
+            cur.execute("SELECT * FROM university")
+            return cur.fetchall()
+
+    def find(self, name:str):
+        with sqlite3.connect(self.dbname) as con:
+            cur = con.cursor()
+            cur.execute("SELECT * FROM university WHERE name = ?;", (name,))
+            return cur.fetchall()
 if __name__ == "__main__":
     obj = University()
     run = ""
     function = ""
     while True:
-        run = input()
-        function = input()
+        run = input("run or exit ")
         if run == "exit":
             break
         
         elif run == "run":
+            function=input("insert read update delete summ filter find ")
             if function == "insert":
                 id = int(input())
                 name = input()
