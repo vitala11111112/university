@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template_string, redirect, url_for
-from university_fixed import University
+from university import University
 
 app = Flask(__name__)
 db = University()
